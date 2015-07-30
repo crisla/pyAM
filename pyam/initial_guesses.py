@@ -28,7 +28,7 @@ class OrthogonalPolynomialInitialGuess(object):
         """
         self.solver = self._validate_solver(solver)
 
-    def _initial_mus(self, xs, exp):
+    def _initial_mus(self, xs, f, **params):
         """
         Return values for mu given some x values and an exponent.
 
@@ -50,14 +50,24 @@ class OrthogonalPolynomialInitialGuess(object):
         input1 = self.solver.problem.input1
         input2 = self.solver.problem.input2
 
-        slope = (input2.upper - input2.lower) / (input1.upper**exp - input1.lower**exp)
+        #slope = (input2.upper - input2.lower) / (input1.upper**exp - input1.lower**exp)
+        #slope = (input2.upper - input2.lower) / (np.exp(exp * input1.upper) - np.exp(exp * input1.lower))
+        slope = (input2.upper - input2.lower) / (f(input1.upper, **params) - f(input1.lower, **params))
+
         if self.solver.problem.assortativity == "positive":
-            intercept = input2.lower - slope * input1.lower**exp
+            #intercept = input2.lower - slope * input1.lower**exp
+            #intercept = input2.lower - slope * np.exp(exp * input1.lower)
+            intercept = input2.lower - slope * f(input1.lower, **params)
+
         else:
             slope = -slope
-            intercept = input2.upper - slope * input1.lower**exp
+            #intercept = input2.upper - slope * input1.lower**exp
+            intercept = input2.upper - slope * f(input1.lower, **params)
 
-        return intercept + slope * xs**exp
+
+       # return intercept + slope * xs**exp
+        #return intercept + slope * np.exp(exp * xs)
+        return intercept + slope * f(xs, **params)
 
     def _initial_guess_mu(self, xs, mus, kind, degree, domain):
         """Fit basis polynomial for mu of a certain kind, degree and domain."""
@@ -91,7 +101,7 @@ class OrthogonalPolynomialInitialGuess(object):
         else:
             return solver
 
-    def compute_initial_guess(self, kind, degrees, N=1000, exp=1.0):
+    def compute_initial_guess(self, kind, degrees, f, N=1000, **params):
         """
         Compute initial orthogonal polynomials.
 
@@ -109,7 +119,7 @@ class OrthogonalPolynomialInitialGuess(object):
         xs = np.linspace(domain[0], domain[1], N)
 
         # initial guess for mu is some power function
-        mus = self._initial_mus(xs, exp)
+        mus = self._initial_mus(xs, f, **params)
         initial_guess_mu = self._initial_guess_mu(xs, mus, kind, degrees['mu'], domain)
 
         # initial guess for theta depends on guess for mu

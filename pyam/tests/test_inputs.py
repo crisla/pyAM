@@ -17,7 +17,8 @@ from .. import inputs
 valid_var, mu, sigma = sym.var('x, mu, sigma')
 valid_cdf = 0.5 + 0.5 * sym.erf((sym.log(valid_var) - mu) / sym.sqrt(2 * sigma**2))
 valid_params = {'mu': 0.0, 'sigma': 1.0}
-valid_bounds = [1e-3, 5e1]
+valid_bounds = (1e-3, 1e2)
+valid_alpha = 0.005
 
 
 def test_validate_cdf():
@@ -29,7 +30,7 @@ def test_validate_cdf():
 
     with nose.tools.assert_raises(AttributeError):
         inputs.Input(var=valid_var, cdf=invalid_cdf, bounds=valid_bounds,
-                     params=valid_params)
+                     alpha=valid_alpha, params=valid_params)
 
 
 def test_validate_lower():
@@ -40,7 +41,8 @@ def test_validate_lower():
 
     with nose.tools.assert_raises(AttributeError):
         workers = inputs.Input(var=valid_var, cdf=valid_cdf,
-                               bounds=valid_bounds, params=valid_params)
+                               bounds=valid_bounds, alpha=valid_alpha,
+                               params=valid_params)
         workers.lower = invalid_lower
 
 
@@ -52,7 +54,8 @@ def test_validate_upper():
 
     with nose.tools.assert_raises(AttributeError):
         workers = inputs.Input(var=valid_var, cdf=valid_cdf,
-                               bounds=valid_bounds, params=valid_params)
+                               bounds=valid_bounds, alpha=valid_alpha,
+                               params=valid_params)
         workers.upper = invalid_upper
 
 
@@ -64,7 +67,7 @@ def test_validate_params():
 
     with nose.tools.assert_raises(AttributeError):
         inputs.Input(var=valid_var, cdf=valid_cdf, bounds=valid_bounds,
-                     params=invalid_params)
+                     alpha=valid_alpha, params=invalid_params)
 
 
 def test_validate_var():
@@ -75,7 +78,7 @@ def test_validate_var():
 
     with nose.tools.assert_raises(AttributeError):
         inputs.Input(var=invalid_var, cdf=valid_cdf, bounds=valid_bounds,
-                     params=valid_params)
+                     alpha=valid_alpha, params=valid_params)
 
 
 def test_evaluate_cdf():
@@ -86,7 +89,7 @@ def test_evaluate_cdf():
     uniform_cdf = (valid_var - a) / (b - a)
     params = {'a': 0.0, 'b': 1.0}
     workers = inputs.Input(var=valid_var, cdf=uniform_cdf, bounds=[0.0, 1.0],
-                           params=params)
+                           alpha=valid_alpha, params=params)
 
     # evaluate with scalar input
     actual_cdf = workers.evaluate_cdf(0.5)

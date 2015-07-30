@@ -65,6 +65,42 @@ class AssortativeMatchingProblem(AssortativeMatchingModelLike, SymbolicTwoPointB
         return ['mu', 'theta']
 
     @property
+    def f(self):
+        """
+        Symbolic expression for intensive output.
+
+        :getter: Return the current expression for intensive output.
+        :type: sympy.Basic.
+
+        """
+        expr = (1 / self._required_symbols[1]) * self.F
+        return expr.subs(self._subs)
+
+    @property
+    def factor_payment_1(self):
+        """
+        Symbolic expression for payments made to input 1.
+
+        :getter: Return the current expression for the factor payments.
+        :type: sympy.Basic.
+
+        """
+        return sym.diff(self.f, self._symbolic_vars[2])
+
+    @property
+    def factor_payment_2(self):
+        """
+        Symbolic expression for payments made to input 2.
+
+        :getter: Return the current expression for the factor payments.
+        :type: sympy.Basic.
+
+        """
+        revenue = self.f
+        costs = self._symbolic_vars[2] * self.factor_payment_1
+        return revenue - costs
+
+    @property
     def Fx(self):
         """
         Symbolic expression for the marginal product of input1.
@@ -74,6 +110,39 @@ class AssortativeMatchingProblem(AssortativeMatchingModelLike, SymbolicTwoPointB
 
         """
         return sym.diff(self.F, self.input1.var)
+
+    @property
+    def Fy(self):
+        """
+        Symbolic expression for the marginal product of input2.
+
+        :getter: Return the the marginal product of input2.
+        :type: sympy.Basic
+
+        """
+        return sym.diff(self.F, self.input2.var)
+
+    @property
+    def Fl(self):
+        """
+        Symbolic expression for the marginal product of l.
+
+        :getter: Return the the marginal product of l.
+        :type: sympy.Basic
+
+        """
+        return sym.diff(self.F, self._required_symbols[0])
+
+    @property
+    def Fr(self):
+        """
+        Symbolic expression for the marginal product of r.
+
+        :getter: Return the the marginal product of r.
+        :type: sympy.Basic
+
+        """
+        return sym.diff(self.F, self._required_symbols[1])
 
     @property
     def Fxy(self):
@@ -87,7 +156,7 @@ class AssortativeMatchingProblem(AssortativeMatchingModelLike, SymbolicTwoPointB
         return sym.diff(self.F, self.input1.var, self.input2.var)
 
     @property
-    def Flr(self):
+    def Fxl(self):
         """
         Symbolic expression for the cross-partial derivative.
 
@@ -95,7 +164,7 @@ class AssortativeMatchingProblem(AssortativeMatchingModelLike, SymbolicTwoPointB
         :type: sympy.Basic
 
         """
-        return sym.diff(self.F, *self._required_symbols)
+        return sym.diff(self.F, self.input1.var, self._required_symbols[0])
 
     @property
     def Fxr(self):
@@ -118,6 +187,28 @@ class AssortativeMatchingProblem(AssortativeMatchingModelLike, SymbolicTwoPointB
 
         """
         return sym.diff(self.F, self.input2.var, self._required_symbols[0])
+
+    @property
+    def Fyr(self):
+        """
+        Symbolic expression for the cross-partial derivative.
+
+        :getter: Return the expression for the cross-partial derivative.
+        :type: sympy.Basic
+
+        """
+        return sym.diff(self.F, self.input2.var, self._required_symbols[1])
+
+    @property
+    def Flr(self):
+        """
+        Symbolic expression for the cross-partial derivative.
+
+        :getter: Return the expression for the cross-partial derivative.
+        :type: sympy.Basic
+
+        """
+        return sym.diff(self.F, *self._required_symbols)
 
     @property
     def H(self):
