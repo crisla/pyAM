@@ -2,7 +2,7 @@
 Test functions for the inputs.py module.
 
 @author : David R. Pugh
-@date : 2014-11-11
+@date : 2015-08-02
 
 """
 import nose
@@ -17,7 +17,7 @@ from .. import inputs
 valid_var, mu, sigma = sym.var('x, mu, sigma')
 valid_cdf = 0.5 + 0.5 * sym.erf((sym.log(valid_var) - mu) / sym.sqrt(2 * sigma**2))
 valid_params = {'mu': 0.0, 'sigma': 1.0}
-valid_bounds = (1e-3, 1e2)
+valid_bounds = (0.1, 1e1)
 valid_alpha = 0.005
 
 

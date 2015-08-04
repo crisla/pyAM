@@ -47,15 +47,10 @@ class Input(object):
         self.var = var
         self.measure = measure  # needs to be assigned before cdf is set!
         self.cdf = cdf
+        self.alpha = alpha  # needs to be assigned before params are set!
+        self.lower = bounds[0]
+        self.upper = bounds[1]
         self.params = params
-
-        # set (or find!) the desired bounds
-        if alpha is None:
-            self.lower = bounds[0]
-            self.upper = bounds[1]
-        else:
-            self.lower = self._find_bound(alpha * self.measure, *bounds)
-            self.upper = self._find_bound((1 - alpha) * self.measure, *bounds)
 
     @property
     def _numeric_cdf(self):
@@ -88,7 +83,7 @@ class Input(object):
     @property
     def cdf(self):
         """
-        Probability distribution function (CDF).
+        Cumulative distribution function (CDF).
 
         :getter: Return the current distribution function.
         :setter: Set a new distribution function.
@@ -99,13 +94,13 @@ class Input(object):
 
     @cdf.setter
     def cdf(self, value):
-        """Set a new probability distribution function (CDF)."""
+        """Set a new cumulative distribution function (CDF)."""
         self._cdf = self.measure * self._validate_cdf(value)  # rescale cdf!
 
     @property
     def lower(self):
         """
-        Lower bound on support of the probability distribution function (CDF).
+        Lower bound on support of the cumulative distribution function (CDF).
 
         :getter: Return the lower bound.
         :setter: Set a new lower bound.
@@ -164,6 +159,7 @@ class Input(object):
         """Set a new parameter dictionary."""
         valid_params = self._validate_params(value)
         self._params = self._order_params(valid_params)
+        self._update_bounds(self.lower, self.upper)
 
     @property
     def pdf(self):
@@ -179,7 +175,7 @@ class Input(object):
     @property
     def upper(self):
         """
-        Upper bound on support of the probability distribution function (CDF).
+        Upper bound on support of the cumulative distribution function (CDF).
 
         :getter: Return the lower bound.
         :setter: Set a new lower bound.
@@ -262,13 +258,19 @@ class Input(object):
         else:
             return value
 
-    def _find_bound(self, alpha, lower, upper):
+    def _find_bound(self, alpha, lower): #, upper):
         """Find the alpha quantile of the CDF."""
-        return optimize.bisect(self._inverse_cdf, lower, upper, args=(alpha,))
+        #return optimize.brentq(self._inverse_cdf, lower, upper, args=(alpha,))
+        return optimize.newton(self._inverse_cdf, lower, args=(alpha,))
 
     def _inverse_cdf(self, x, alpha):
         """Inverse CDF used to identify the lower and upper bounds."""
         return self.evaluate_cdf(x) - alpha
+
+    def _update_bounds(self, lower, upper):
+        if self.alpha is not None:
+            self.lower = self._find_bound(self.alpha * self.measure, lower)
+            self.upper = self._find_bound((1 - self.alpha) * self.measure, upper)
 
     def _validate_lower_bound(self, value):
         """Validate the lower bound on the suppport of the CDF."""
