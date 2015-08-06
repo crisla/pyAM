@@ -29,7 +29,7 @@ CLASSIFIERS = ['Development Status :: 3 - Alpha',
 setup(
       name="pyam",
       packages=['pyam'],
-      version='0.2.1-alpha',
+      version='0.2.2-alpha',
       description=DESCRIPTION,
       long_description=read('README.rst'),
       license="MIT License",

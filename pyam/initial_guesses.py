@@ -4,7 +4,7 @@ import numpy as np
 Class for computing initial guesses for the various solvers.
 
 @author : David R. Pugh
-@date : 2015-07-14
+@date : 2015-08-06
 
 """
 import pycollocation
@@ -50,23 +50,15 @@ class OrthogonalPolynomialInitialGuess(object):
         input1 = self.solver.problem.input1
         input2 = self.solver.problem.input2
 
-        #slope = (input2.upper - input2.lower) / (input1.upper**exp - input1.lower**exp)
-        #slope = (input2.upper - input2.lower) / (np.exp(exp * input1.upper) - np.exp(exp * input1.lower))
         slope = (input2.upper - input2.lower) / (f(input1.upper, **params) - f(input1.lower, **params))
 
         if self.solver.problem.assortativity == "positive":
-            #intercept = input2.lower - slope * input1.lower**exp
-            #intercept = input2.lower - slope * np.exp(exp * input1.lower)
             intercept = input2.lower - slope * f(input1.lower, **params)
 
         else:
             slope = -slope
-            #intercept = input2.upper - slope * input1.lower**exp
             intercept = input2.upper - slope * f(input1.lower, **params)
 
-
-       # return intercept + slope * xs**exp
-        #return intercept + slope * np.exp(exp * xs)
         return intercept + slope * f(xs, **params)
 
     def _initial_guess_mu(self, xs, mus, kind, degree, domain):

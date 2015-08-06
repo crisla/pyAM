@@ -2,7 +2,7 @@
 Classes for modeling heterogenous factors of production.
 
 @author : David R. Pugh
-@date : 2015-07-28
+@date : 2015-08-06
 
 """
 from __future__ import division
@@ -258,9 +258,8 @@ class Input(object):
         else:
             return value
 
-    def _find_bound(self, alpha, lower): #, upper):
+    def _find_bound(self, alpha, lower):
         """Find the alpha quantile of the CDF."""
-        #return optimize.brentq(self._inverse_cdf, lower, upper, args=(alpha,))
         return optimize.newton(self._inverse_cdf, lower, args=(alpha,))
 
     def _inverse_cdf(self, x, alpha):
@@ -298,7 +297,7 @@ class Input(object):
         out = self._numeric_cdf(value, *self.params.values())
         return out
 
-    def evaluate_pdf(self, value, norm=True):
+    def evaluate_pdf(self, value, norm=False):
         """
         Numerically evaluate the probability density function (pdf).
 
@@ -306,9 +305,9 @@ class Input(object):
         ----------
         value : numpy.ndarray
             Values at which to evaluate the pdf.
-        norm : boolean
+        norm : boolean (default=False)
             True if you wish to normalize the pdf so that it integrates to one;
-            false otherwise.
+            False otherwise.
 
         Returns
         -------
