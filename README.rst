@@ -15,10 +15,12 @@ pyAM
    :target: https://pypi.python.org/pypi/pyAM/
 .. |Downloads| image:: https://img.shields.io/pypi/dm/pyAM.svg
    :target: https://pypi.python.org/pypi/pyAM/
-.. |DOI| image:: https://zenodo.org/badge/doi/10.5281/zenodo.20223.svg   
-   :target: http://dx.doi.org/10.5281/zenodo.20223
+.. |DOI| image:: https://zenodo.org/badge/doi/10.5281/zenodo.22396.svg   
+   :target: http://dx.doi.org/10.5281/zenodo.22396
 
-Python package for solving assortative matching models with two-sided heterogeneity.
+Python package for solving assortative matching models with two-sided heterogeneity.  The theoretical framework behind the class of models solved by pyAM is described in `Eeckhout and Kircher (2012)`_.
+
+.. _`Eeckhout and Kircher (2012)`: http://homepages.econ.ed.ac.uk/~pkircher/Papers/Sorting-and-Factor-Intensity.pdf
 
 Installation
 ------------

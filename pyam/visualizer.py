@@ -14,6 +14,15 @@ class Visualizer(pycollocation.Visualizer):
     __solution = None
 
     @property
+    def _combined_solution_functionals(self):
+        """Dictionary of functions evaluated along the model solution."""
+        tmp = {}
+        tmp.update(self._complementarities)
+        tmp.update(self._partials)
+        tmp.update(self._factor_payments)
+        return tmp
+
+    @property
     def _complementarities(self):
         """Dictionary mapping a complementarity to a callable function."""
         tmp = {}
@@ -49,16 +58,12 @@ class Visualizer(pycollocation.Visualizer):
         if self.__solution is None:
             tmp = super(Visualizer, self)._solution
 
-            # list of tuples!
-            derivatives = (self._complementarities.items() + self._partials.items() +
-                           self._factor_payments.items())
-
-            for derivative, function in derivatives:
+            for key, function in self._combined_solution_functionals.items():
                 values = function(self.interpolation_knots,
                                   tmp['mu'].values,
                                   tmp['theta'].values,
                                   *self.solver.problem.params.values())
-                tmp[derivative] = pd.Series(values, index=self.interpolation_knots)
+                tmp[key] = pd.Series(values, index=self.interpolation_knots)
 
             self.__solution = tmp
 
@@ -74,7 +79,7 @@ class Visualizer(pycollocation.Visualizer):
     @staticmethod
     def compute_cdf(pdf):
         """Compute the cumulative distribution function (cdf) given a pdf."""
-        values = np.array([np.trapz(pdf.iloc[:x], pdf.index[:x]) for x in xrange(pdf.size)])
+        values = np.array([np.trapz(pdf.iloc[:x], pdf.index[:x]) for x in range(pdf.size)])
         cdf = pd.Series(values, index=pdf.index.values)
         return cdf
 

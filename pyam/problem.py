@@ -250,9 +250,10 @@ class AssortativeMatchingProblem(AssortativeMatchingModelLike, SymbolicTwoPointB
         :type: dict
 
         """
-        model_params = dict(self.F_params.items() +
-                            self.input1.params.items() +
-                            self.input2.params.items())
+        model_params = {}
+        model_params.update(self.input1.params)
+        model_params.update(self.input2.params)
+        model_params.update(self.F_params)
         return self._order_params(model_params)
 
     @property
