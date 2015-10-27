@@ -1,7 +1,33 @@
+
 """
 Define functions needed for estimation
 
-@author : Julia
+@author : Julia & Cristina
+
+TO_DOs:
+
+Part I: Re-typing the code
+
+1.1 Check Current functions solve correctly a sample model.
+1.2 Build the Residual Function (classical flavour: regressions)
+1.3 Test the Residual Function
+1.4 Build plotting capabilities (initial guesses, current solution vs data)
+1.5 Test RF in minimizer
+
+Part II: One step approach
+
+3.1 Finish reset_inputs--> updates x_pam and y_pam (maybe bounds and scaling too)
+3.2 Build a more comprehansive solve model that takes xypams as input too
+3.3 Rewrite Residual_Function to incorporate xpams too
+3.4 Test new residual function
+3.5 Feed it to the minimizer
+
+
+Part III: Two Step approach
+
+3.1 Build find_optimal_pams --> Finds optimal parameters for x_pam and y_pam
+3.2 Build find_optimal_xypams --> Taking the resulting parameters as given, finds optimal x_pam and y_pam
+3.3 Build The_Big_Wrap --> wraps 2.1 and 2.2 into a giant solver
 
 """
 from __future__ import division
@@ -18,8 +44,127 @@ import operator
 
 class Julia_Estimation(object):
 
-	def __init__(self):
+	def __init__(self, x_pam, x_bounds, y_pam, y_bounds, x_scaling,A_scaling):
+		'''
+		Puts together an Heterogeneous Workers and Firms model with the parameters especified,
+		imports data to carry on the estimation and estimates the parameters of the model:
+		                       { omega_A, omega_B, sigma and Big_A }
+
+		Call the Instructions() function to print the condensed user manual.
+
+		Parameters:
+		-------
+
+		x_pam: tuple or list, with floats loc1, mu1 sigma1.
+		x_bounds: tuple or list, with floats x.lower and x.upper.
+		y_pam: tuple or list, with floats loc2, mu2 and sigma2.
+		y_bounds: tuple or list, with y.lower and y.upper.
+		x_scaling: float, average workers per firm, to scale up the size of x.
+				   May change in the future to make it endogenous.
+		A_scaling: float, scaling parameter for Big_A. To be chosen from the data.
+		
+		'''
+
+		self.x_pam = x_pam
+		self.x_bounds = x_bounds
+		self.y_pam = y_pam
+		self.y_bounds = y_bounds
+		self.x_scaling = x_scaling
+		self.A_scaling = A_scaling 
+		
+		self.workers = None
+		self.firms = None
+		self.F
+
+		self.solver = None
+		self.initial_guess = None
+		self.solution_t  = None
+
+		self.data = None
+
+		self.ready = False	
 		self.mynumber = 5
+
+	def set_inputs(self):
+		"""
+		Sets inputs up with the information provided when creating the instance of the class
+		"""
+		# define some workers skill
+		x, loc1, mu1, sigma1 = sym.var('x, loc1, mu1, sigma1')
+		skill_cdf = 0.5 + 0.5 * sym.erf((sym.log(x - loc1) - mu1) / sym.sqrt(2 * sigma1**2))
+		skill_params = {'loc1': self.x_pam[0], 'mu1': self.x_pam[1], 'sigma1': self.x_pam[2]}
+
+		self.workers = pyam.Input(var=x,
+                     cdf=skill_cdf,
+                     params=skill_params,
+                     bounds=self.x_bounds,  # guesses for the alpha and (1 - alpha) quantiles!
+                     alpha=0.0005,
+                     measure=self.x_scaling  # 15x more workers than firms
+                     )
+
+		# define some firms - scaling normalized to 1
+		y, loc2, mu2, sigma2 = sym.var('y, loc2, mu2, sigma2')
+		productivity_cdf = 0.5 + 0.5 * sym.erf((sym.log(y - loc2) - mu2) / sym.sqrt(2 * sigma2**2))
+		productivity_params = {'loc2': self.y_pam[0] 'mu2': self.y_pam[1], 'sigma2': self.y_pam[2]}
+
+		self.firms = pyam.Input(var=y,
+                   cdf=productivity_cdf,
+                   params=productivity_params,
+                   bounds=self.x_bounds,  # guesses for the alpha and (1 - alpha) quantiles!
+                   alpha=0.0005,
+                   measure=1.0
+                   )
+
+	def plot_inputs(self):
+		""" Under construction. Will return plots for workers or firms."""
+
+	def reset_inputs(self,xypams):
+		""" Under construction. Will updated stored parameter values and call set_inputs()"""
+
+	def set_Production_Function(self, Pfunction):
+		self.F = PFunction
+
+	def set_up_solver(self,PFunction,F_params,assorty="positive"):
+		""" Does orthogonal collocation by default """
+		
+		problem = pyam.AssortativeMatchingProblem(assortativity=assorty,
+                                          input1=self.workers,
+                                          input2=self.firms,
+                                          F=self.F,
+                                          F_params=F_params)
+
+		self.solver = pycollocation.OrthogonalPolynomialSolver(problem)
+
+	def initial_guess(degrees_mu,degrees_theta,kind="Chebyshev"):
+		"""Sets up the initial guess"""
+		initial_guess = pyam.OrthogonalPolynomialInitialGuess(self.solver)
+		initial_polys = initial_guess.compute_initial_guess(kind,
+                                                    degrees={'mu':degrees_mu, 'theta': degrees_theta},
+                                                    f=lambda x, alpha: x**alpha,
+                                                    alpha=0.0001)
+		self.initial_guess = {'guess':initial_guess,'polys':initial_polys}
+
+	def areyoureadyforthis(self):
+		""" Work in progress: Do a batery of tests before proceesing to detect mistakes"""
+
+	def solve_model(self,kind='Chebyshev'):
+		domain = [self.workers.lower, self.workers.upper]
+		initial_coefs = {'mu': self.initial_guess['polys']['mu'].coef,
+                 'theta': self.initial_guess['polys']['theta'].coef}
+
+		self.solver.solve(kind=kind,
+             	coefs_dict=initial_coefs,
+             	domain=domain,
+             	method='hybr')
+		if self.solver.result.success:
+			self.solution_t = pyam.Visualizer(solver).solution
+		else:
+			print "Something went wrong!"
+
+
+	def diditwork(self):
+		"""Helpful shortcut to know if the model worked fine"""
+		return self.solver.result.success
 
 
 	def import_data(self,file_name, ID=True, weights=False, logs=False,yearly_w=False, change_weight=False, dummy=False, labels=True):

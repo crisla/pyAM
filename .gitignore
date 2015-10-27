@@ -27,3 +27,5 @@ docs/build
 
 # ignore MANIFEST
 MANIFEST
+
+*.ipynb
