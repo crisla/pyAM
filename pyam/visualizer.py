@@ -71,7 +71,7 @@ class Visualizer(pycollocation.Visualizer):
 
     def _theta_frequency(self):
         """Compute the frequency (i.e, measure) of firm size."""
-        tmp_df = self.solution.sort('theta', ascending=True, inplace=False)
+        tmp_df = self.solution.sort_values('theta', ascending=True, inplace=False)
         input1_freq = self.solver.problem.input1.evaluate_pdf(tmp_df.index.values)
         theta_frequency = input1_freq / tmp_df.theta
         return theta_frequency
@@ -91,7 +91,7 @@ class Visualizer(pycollocation.Visualizer):
 
     def compute_pdf(self, variable, normalize=True):
         """Compute the probability density function (pdf) for some variable."""
-        tmp_df = self.solution.sort(variable, ascending=True, inplace=False)
+        tmp_df = self.solution.sort_values(variable, ascending=True, inplace=False)
         tmp_df['theta_frequency'] = self._theta_frequency()
 
         if normalize:
